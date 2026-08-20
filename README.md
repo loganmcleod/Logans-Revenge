@@ -1,6 +1,10 @@
 # Logan's Revenge
 
-> A read-only Claude Code agent that walks into a legacy codebase and hands you a plan to **stabilize it with the least possible effort** — not a rewrite proposal.
+[![Release](https://img.shields.io/github/v/release/loganmcleod/Logans-Revenge?sort=semver)](https://github.com/loganmcleod/Logans-Revenge/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Runs on: Claude Code + Codex](https://img.shields.io/badge/runs%20on-Claude%20Code%20%2B%20Codex-8A2BE2)](#install)
+
+> A read-only agent that walks into a legacy codebase and hands you a plan to **stabilize it with the least possible effort** — not a rewrite proposal. Runs on **Claude Code** and **Codex CLI**.
 
 Every senior engineer has inherited the codebase that pages them at 3am. `Logan's Revenge` is the diagnostician you wish you'd had: it performs deep static analysis across eight engineering lenses, scores every finding by real production risk, and tells you the **smallest change** that removes each defect — including which defects to *leave alone*.
 
@@ -81,32 +85,64 @@ cd Logans-Revenge
 # or pick one:
 ./install.sh claude               # ~/.claude/agents  (every project)
 ./install.sh claude ~/work/legacy # per-project: <dir>/.claude/agents
-./install.sh codex                # ~/.codex/prompts   (invoke with /legacy-stabilization-auditor)
+./install.sh codex                # ~/.codex/prompts   (invoke with /logans-revenge)
 ```
 
 **Claude Code.** The agent is a subagent — a Markdown file with frontmatter — inheriting whatever model your session runs, restricted to read-only tools (`Read`, `Grep`, `Glob`, `Bash`).
 
-**Codex CLI.** Codex has no tool-restricted subagents, so `install.sh` derives a prompt from the same file (frontmatter stripped) and drops it in `~/.codex/prompts/`. Read-only behavior is enforced by the agent's own contract — *it never edits code* — not by tooling. Invoke it with `/legacy-stabilization-auditor`.
+**Codex CLI.** Codex has no tool-restricted subagents, so `install.sh` derives a prompt from the same file (frontmatter stripped) and drops it in your Codex prompts dir — `$CODEX_HOME/prompts/` if set, else `~/.codex/prompts/`. The filename becomes the command: type `/logans-revenge` in the Codex composer to run it. Read-only behavior is enforced by the agent's own contract — *it never edits code* — not by tooling.
 
-The Claude agent file (`.claude/agents/legacy-stabilization-auditor.md`) is the single source of truth; the Codex prompt is generated from it, so the two never drift.
+The Claude agent file (`.claude/agents/logans-revenge.md`) is the single source of truth; the Codex prompt is generated from it, so the two never drift.
 
 ### Manual install (no clone)
 
 **Claude, per project:**
 ```bash
 mkdir -p .claude/agents
-curl -o .claude/agents/legacy-stabilization-auditor.md \
-  https://raw.githubusercontent.com/loganmcleod/Logans-Revenge/v1.0/.claude/agents/legacy-stabilization-auditor.md
+curl -o .claude/agents/logans-revenge.md \
+  https://raw.githubusercontent.com/loganmcleod/Logans-Revenge/v1.1/.claude/agents/logans-revenge.md
 ```
 
 ## Use
 
-Once installed, invoke it in Claude Code:
+**Claude Code** — invoke by name, or let it self-trigger:
 
-- **By name:** `Use the legacy-stabilization-auditor to diagnose this repo and give me a stabilization plan.`
-- **It self-triggers** on requests like "audit / diagnose / evaluate / triage this legacy codebase" or "how do I stabilize this?"
+- **By name:** `Use the logans-revenge agent to diagnose this repo and give me a stabilization plan.`
+- **Self-triggers** on requests like "audit / diagnose / evaluate / triage this legacy codebase" or "how do I stabilize this?"
+
+**Codex CLI** — type the slash command in the composer:
+
+```
+/logans-revenge diagnose the order-service module and give me a stabilization plan
+```
 
 Point it at a whole repo, a module, or a single subsystem. The tighter the scope, the deeper the trace.
+
+### What you get back
+
+A two-tier report. Tier 1 diagnoses; Tier 2 tells you the smallest change per fix — and what to leave alone. Trimmed example:
+
+```
+TIER 1 — DIAGNOSIS
+
+### N+1 on order line items
+- Lens: Database & Persistence
+- File(s)/Line(s): src/orders/repo.ts:88
+- Risk: High · Blast radius: Service-wide · Confidence: Verified
+- Mechanism: `await` inside `.map` issues one query per line item; a 200-line
+  order fires 200 round-trips, saturating the pool under checkout load.
+- Evidence: rows.map(async r => db.select()... ) with no batching.
+
+TIER 2 — STABILIZATION PLAN
+
+A. Stabilize now
+- Batch the line-item fetch — Effort: S · Removes: the N+1 pool exhaustion ·
+  Smallest change: one `inArray(ids)` query, no schema/interface change.
+
+C. Do-not-touch
+- The 900-line OrderService god class — high effort, no active failure; splitting
+  it now risks more than the smell costs. Revisit only if it blocks a feature.
+```
 
 ## License
 

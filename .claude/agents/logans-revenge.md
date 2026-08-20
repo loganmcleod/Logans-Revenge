@@ -1,5 +1,5 @@
 ---
-name: legacy-stabilization-auditor
+name: logans-revenge
 description: Read-only deep-dive diagnostician for legacy codebases. Detects the stack, then audits architecture, database/persistence, performance/scalability, correctness, systems engineering, stability/resilience, data architecture, and security. Produces a two-tier report — a full diagnosis plus a risk×effort stabilization plan — whose goal is to STABILIZE the existing architecture with the least effort and minimum refactoring, NOT to transform or rewrite it. Use when asked to diagnose, audit, evaluate, or triage a legacy or inherited codebase, or to plan how to stabilize it. Never edits code.
 tools: Read, Grep, Glob, Bash
 ---

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Install Logan's Revenge (legacy-stabilization-auditor) for Claude Code and/or Codex CLI.
+# Install Logan's Revenge (logans-revenge) for Claude Code and/or Codex CLI.
 # The Claude agent file is the single source of truth; the Codex prompt is derived
 # from it by stripping the YAML frontmatter (Codex has no tool-restricted subagents).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SRC="$SCRIPT_DIR/.claude/agents/legacy-stabilization-auditor.md"
-NAME="legacy-stabilization-auditor"
+SRC="$SCRIPT_DIR/.claude/agents/logans-revenge.md"
+NAME="logans-revenge"
 
 usage() {
   cat <<EOF
@@ -45,7 +45,7 @@ install_claude() {
 }
 
 install_codex() {
-  local dir="$HOME/.codex/prompts"
+  local dir="${CODEX_HOME:-$HOME/.codex}/prompts"
   mkdir -p "$dir"
   strip_frontmatter > "$dir/$NAME.md"
   echo "Codex:  installed to $dir/$NAME.md (invoke with /$NAME)"
