@@ -71,22 +71,33 @@ Adding an adapter is a documentation edit, not a code change — extend the appe
 
 ## Install
 
-`Logan's Revenge` is a [Claude Code](https://claude.com/claude-code) subagent — a single Markdown file with frontmatter.
+`Logan's Revenge` is one portable agent definition that runs on both **[Claude Code](https://claude.com/claude-code)** and **[Codex CLI](https://developers.openai.com/codex/cli)**. Clone the repo, then run `install.sh`:
 
-**Per project** (checked into a repo you want the agent available in):
+```bash
+git clone https://github.com/loganmcleod/Logans-Revenge.git
+cd Logans-Revenge
+
+./install.sh both                 # Claude (global) + Codex
+# or pick one:
+./install.sh claude               # ~/.claude/agents  (every project)
+./install.sh claude ~/work/legacy # per-project: <dir>/.claude/agents
+./install.sh codex                # ~/.codex/prompts   (invoke with /legacy-stabilization-auditor)
+```
+
+**Claude Code.** The agent is a subagent — a Markdown file with frontmatter — inheriting whatever model your session runs, restricted to read-only tools (`Read`, `Grep`, `Glob`, `Bash`).
+
+**Codex CLI.** Codex has no tool-restricted subagents, so `install.sh` derives a prompt from the same file (frontmatter stripped) and drops it in `~/.codex/prompts/`. Read-only behavior is enforced by the agent's own contract — *it never edits code* — not by tooling. Invoke it with `/legacy-stabilization-auditor`.
+
+The Claude agent file (`.claude/agents/legacy-stabilization-auditor.md`) is the single source of truth; the Codex prompt is generated from it, so the two never drift.
+
+### Manual install (no clone)
+
+**Claude, per project:**
 ```bash
 mkdir -p .claude/agents
 curl -o .claude/agents/legacy-stabilization-auditor.md \
-  https://raw.githubusercontent.com/<your-org>/Logans-Revenge/main/.claude/agents/legacy-stabilization-auditor.md
+  https://raw.githubusercontent.com/loganmcleod/Logans-Revenge/v1.0/.claude/agents/legacy-stabilization-auditor.md
 ```
-
-**Globally** (available in every project on your machine):
-```bash
-mkdir -p ~/.claude/agents
-cp .claude/agents/legacy-stabilization-auditor.md ~/.claude/agents/
-```
-
-The agent inherits whatever model your Claude Code session is running and is restricted to read-only tools (`Read`, `Grep`, `Glob`, `Bash`).
 
 ## Use
 
